@@ -9,6 +9,37 @@ void takeItem(Room *room, Player *player);
 void showInventory(Player *player);
 int hasItem(Player *player, char itemName[]);
 void solvePuzzle(Room *room, Player *player);
+   
+      
+      //MAIN FUNCTION
+
+int main(){
+
+      Room rooms[NUM_ROOMS];
+
+      Player player;
+
+      int choice;
+
+      int running =1;
+
+      scrand(time(NULL));
+
+      initializeROOMS(rooms);
+      initializeplayer(&player);
+
+      printf("===============================\n\n");
+       printf("ESCAPE THE HAUNTED MANSION\n");
+      printf("===============================\n\n");
+
+       printf("ENTER YOUR NAME:");
+
+
+       fgets(player.name, sizeof(player.name), stdin);
+
+      player.name[strcspn(player.name, "\n")] = '\0';
+
+}
 
 
 
@@ -75,3 +106,19 @@ while(running)
         
         
     }
+
+          //MAIN FUNCTION
+
+   //WIN CONDITION
+
+
+     if(player.currentRoom == 0 && hasItem(&player, "Master Key"))
+        {
+            printf("\n=====================================\n");
+            printf(" YOU ESCAPED THE HAUNTED MANSION!\n");
+            printf("=====================================\n");
+
+            running = 0;
+        }
+
+
