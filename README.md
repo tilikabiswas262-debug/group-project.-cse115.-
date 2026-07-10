@@ -5,10 +5,8 @@ Text-Based Adventure Game: Create an interactive text-based adventure game where
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
 #define NUM_ROOMS 5
 #define MAX_ITEMS 10
-
 #define NORTH 0
 #define SOUTH 1
 #define EAST 2
