@@ -11,9 +11,10 @@ int hasItem(Player *player, char itemName[]);
 void solvePuzzle(Room *room, Player *player);
    
       
-      //MAIN FUNCTION
+      /*MAIN FUNCTION*/
 
-int main(){
+int main()
+{
 
       Room rooms[NUM_ROOMS];
 
@@ -38,14 +39,6 @@ int main(){
        fgets(player.name, sizeof(player.name), stdin);
 
       player.name[strcspn(player.name, "\n")] = '\0';
-
-}
-
-
-
-
-
-
 
 while(running)
     {
@@ -103,13 +96,8 @@ while(running)
             default:
                 printf("\nInvalid choice.\n");
         }
-        
-        
-    }
 
-   
-
-   //WIN CONDITION
+   /*WIN CONDITION*/
 
 
      if(player.currentRoom == 0 && hasItem(&player, "Master Key"))
@@ -120,5 +108,7 @@ while(running)
 
             running = 0;
         }
-
+      }
+       return 0;
+}
 
