@@ -141,7 +141,132 @@ void showRoom(Room r[], Player *p)
     if (x->exits[WEST] != -1) printf(" West");
     printf("\n===============================\n");
 }
+/* ==================== 9. MOVEMENT & GHOST ATTACKS ==================== */
+void movePlayer(Room r[], Player *p, int direction)
+{
+    int next = r[p->currentRoom].exits[direction], damage;
 
+    if (next == -1) {
+        printf("\nYou cannot move in that direction.\n");
+        return;
+    }
+
+    if (next == 4 && !hasItem(p, "Flashlight")) {
+        printf("\nIt is too dark to enter the Basement.\n");
+        printf("You need the Flashlight first.\n");
+        return;
+    }
+
+    if (next == 5 && !hasItem(p, "Silver Key")) {
+        printf("\nThe Secret Chamber is locked.\n");
+        printf("You need the Silver Key to enter.\n");
+        return;
+    }
+
+    p->currentRoom = next;
+    printf("\nYou entered the %s.\n", r[next].name);
+
+    if (r[next].ghost && !r[next].ghostDefeated) {
+        damage = r[next].damage + rand() % 6;
+        p->health -= damage;
+        if (p->health < 0) p->health = 0;
+        r[next].ghostDefeated = 1;
+        printf("A ghost suddenly attacks you!\n");
+        printf("You lost %d health.\n", damage);
+        if (p->health > 0) printf("The ghost disappears.\n");
+    }
+}
+
+/* ==================== 10. ITEMS & INVENTORY ==================== */
+void takeItem(Room r[], Player *p)
+{
+    Room *x = &r[p->currentRoom];
+
+    if (!strlen(x->item)) {
+        printf("\nThere is no item in this room.\n");
+        return;
+    }
+    if (x->itemTaken) {
+        printf("\nYou already collected this item.\n");
+        return;
+    }
+    if (p->itemCount >= MAX_ITEMS) {
+        printf("\nYour inventory is full.\n");
+        return;
+    }
+
+    strcpy(p->inventory[p->itemCount++], x->item);
+    x->itemTaken = 1;
+    p->score += 10;
+    printf("\nYou collected: %s\nScore +10\n", x->item);
+
+    if (!strcmp(x->item, "Flashlight"))
+        printf("You can now enter the dark Basement.\n");
+    else if (!strcmp(x->item, "Silver Key"))
+        printf("The Secret Chamber can now be opened.\n");
+    else if (!strcmp(x->item, "Master Key"))
+        printf("Return to the Entrance Hall to escape!\n");
+}
+
+void showInventory(Player *p)
+{
+    int i;
+    if (!p->itemCount) {
+        printf("\nYour inventory is empty.\n");
+        return;
+    }
+    printf("\n========== INVENTORY ==========\n");
+    for (i = 0; i < p->itemCount; i++)
+        printf("%d. %s\n", i + 1, p->inventory[i]);
+    printf("===============================\n");
+}
+
+/* ==================== 11. MED KIT / HEALING ==================== */
+void useHealingItem(Player *p)
+{
+    int i, choice, heal = 0;
+
+    if (p->health == MAX_HEALTH) {
+        printf("\nYour health is already full.\n");
+        return;
+    }
+
+    printf("\nHealing Items:\n");
+    for (i = 0; i < p->itemCount; i++)
+        if (!strcmp(p->inventory[i], "Medicine") ||
+            !strcmp(p->inventory[i], "Med Kit"))
+            printf("%d. %s\n", i + 1, p->inventory[i]);
+
+    printf("Enter the item number to use: ");
+    if (scanf("%d", &choice) != 1) {
+        while (getchar() != '\n');
+        printf("Invalid choice.\n");
+        return;
+    }
+    while (getchar() != '\n');
+    choice--;
+
+    if (choice < 0 || choice >= p->itemCount) {
+        printf("Invalid choice.\n");
+        return;
+    }
+
+    if (!strcmp(p->inventory[choice], "Medicine")) heal = 20;
+    else if (!strcmp(p->inventory[choice], "Med Kit")) heal = 35;
+    else {
+        printf("That item cannot be used for healing.\n");
+        return;
+    }
+
+    p->health += heal;
+    if (p->health > MAX_HEALTH) p->health = MAX_HEALTH;
+    printf("\nYou restored %d health.\n", heal);
+    printf("Current Health: %d/%d\n", p->health, MAX_HEALTH);
+
+    for (i = choice; i < p->itemCount - 1; i++)
+        strcpy(p->inventory[i], p->inventory[i + 1]);
+    p->itemCount--;
+}
 
 /* ==================== 12. PUZZLES & KEYS ==================== */
 void solvePuzzle(Room r[], Player *p)
