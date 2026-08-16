@@ -42,9 +42,15 @@ void menu(void)
 {
     int c;
     while (1) {
-        printf("\n==============================\n");
-        printf("       ESCAPING THE HAUNTED MANSION\n");
-        printf("==============================\n");
+        printf("\n");
+    printf("  #############################################\n");
+    printf("  #                                           #\n");
+    printf("  #        E S C A P E   T H E                #\n");
+    printf("  #      H A U N T E D   M A N S I O N        #\n");
+    printf("  #                                           #\n");
+    printf("  #############################################\n");
+    printf("\n");
+    printf("           Don't look behind you...\n\n");
         printf("1. Start Game\n2. Exit\n");
         printf("Enter your choice: ");
         if (scanf("%d", &c) != 1) {
