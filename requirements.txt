@@ -1,0 +1,3 @@
+# Escaping the Haunted Mansion
+# No external libraries or third-party packages are required.
+# Standard C libraries used: stdio.h, stdlib.h, string.h, time.h
