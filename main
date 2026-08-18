@@ -148,132 +148,130 @@ void showRoom(Room r[], Player *p)
     printf("\n===============================\n");
 }
 /* ==================== 9. MOVEMENT & GHOST ATTACKS ==================== */
-void movePlayer(Room r[], Player *p, int direction)
+void movePlayer(Room r[], Player *p, int direction) // Moves player and handles ghosts
 {
-    int next = r[p->currentRoom].exits[direction], damage;
+    int next = r[p->currentRoom].exits[direction], damage; // Gets next room and damage
 
-    if (next == -1) {
-        printf("\nYou cannot move in that direction.\n");
-        return;
+    if (next == -1) { // Checks if movement is blocked
+        printf("\nYou cannot move in that direction.\n"); // Shows movement error
+        return; // Stops movement
     }
 
-    if (next == 4 && !hasItem(p, "Flashlight")) {
-        printf("\nIt is too dark to enter the Basement.\n");
-        printf("You need the Flashlight first.\n");
-        return;
+    if (next == 4 && !hasItem(p, "Flashlight")) { // Checks basement access requirement
+        printf("\nIt is too dark to enter the Basement.\n"); // Explains basement restriction
+        printf("You need the Flashlight first.\n"); // Requests flashlight
+        return; // Stops movement
+    }
+    if (next == 5 && !hasItem(p, "Silver Key")) { // Checks chamber key requirement
+        printf("\nThe Secret Chamber is locked.\n"); // Explains chamber restriction
+        printf("You need the Silver Key to enter.\n"); // Requests silver key
+        return; // Stops movement
     }
 
-    if (next == 5 && !hasItem(p, "Silver Key")) {
-        printf("\nThe Secret Chamber is locked.\n");
-        printf("You need the Silver Key to enter.\n");
-        return;
-    }
+    p->currentRoom = next; // Updates player's room
+    printf("\nYou entered the %s.\n", r[next].name); // Announces new room
 
-    p->currentRoom = next;
-    printf("\nYou entered the %s.\n", r[next].name);
-
-    if (r[next].ghost && !r[next].ghostDefeated) {
-        damage = r[next].damage + rand() % 6;
-        p->health -= damage;
-        if (p->health < 0) p->health = 0;
-        r[next].ghostDefeated = 1;
-        printf("A ghost suddenly attacks you!\n");
-        printf("You lost %d health.\n", damage);
-        if (p->health > 0) printf("The ghost disappears.\n");
+    if (r[next].ghost && !r[next].ghostDefeated) { // Checks for active ghost
+        damage = r[next].damage + rand() % 6; // Calculates random ghost damage
+        p->health -= damage; // Reduces player health
+        if (p->health < 0) p->health = 0; // Prevents negative health
+        r[next].ghostDefeated = 1; // Marks ghost as defeated
+        printf("A ghost suddenly attacks you!\n"); // Announces ghost attack
+        printf("You lost %d health.\n", damage); // Displays lost health
+        if (p->health > 0) printf("The ghost disappears.\n"); // Announces ghost disappearance
     }
 }
 
 /* ==================== 10. ITEMS & INVENTORY ==================== */
-void takeItem(Room r[], Player *p)
+void takeItem(Room r[], Player *p) // Collects room items
 {
-    Room *x = &r[p->currentRoom];
+    Room *x = &r[p->currentRoom]; // Gets current room
 
-    if (!strlen(x->item)) {
-        printf("\nThere is no item in this room.\n");
-        return;
+    if (!strlen(x->item)) { // Checks if room has item
+        printf("\nThere is no item in this room.\n"); // Shows no-item message
+        return; // Stops item collection
     }
-    if (x->itemTaken) {
-        printf("\nYou already collected this item.\n");
-        return;
+    if (x->itemTaken) { // Checks if item was collected
+        printf("\nYou already collected this item.\n"); // Shows collected message
+        return; // Stops item collection
     }
-    if (p->itemCount >= MAX_ITEMS) {
-        printf("\nYour inventory is full.\n");
-        return;
+    if (p->itemCount >= MAX_ITEMS) { // Checks inventory capacity
+        printf("\nYour inventory is full.\n"); // Shows full inventory message
+        return; // Stops item collection
     }
 
-    strcpy(p->inventory[p->itemCount++], x->item);
-    x->itemTaken = 1;
-    p->score += 10;
-    printf("\nYou collected: %s\nScore +10\n", x->item);
+    strcpy(p->inventory[p->itemCount++], x->item); // Adds item to inventory
+    x->itemTaken = 1; // Marks item as collected
+    p->score += 10; // Adds item collection score
+    printf("\nYou collected: %s\nScore +10\n", x->item); // Announces collected item
 
-    if (!strcmp(x->item, "Flashlight"))
-        printf("You can now enter the dark Basement.\n");
-    else if (!strcmp(x->item, "Silver Key"))
-        printf("The Secret Chamber can now be opened.\n");
-    else if (!strcmp(x->item, "Master Key"))
-        printf("Return to the Entrance Hall to escape!\n");
+    if (!strcmp(x->item, "Flashlight")) // Checks for flashlight
+        printf("You can now enter the dark Basement.\n"); // Announces basement access
+    else if (!strcmp(x->item, "Silver Key")) // Checks for silver key
+        printf("The Secret Chamber can now be opened.\n"); // Announces chamber access
+    else if (!strcmp(x->item, "Master Key")) // Checks for master key
+        printf("Return to the Entrance Hall to escape!\n"); // Announces escape requirement
 }
 
-void showInventory(Player *p)
+void showInventory(Player *p) // Displays player's inventory
 {
-    int i;
-    if (!p->itemCount) {
-        printf("\nYour inventory is empty.\n");
-        return;
+    int i; // Controls inventory display
+    if (!p->itemCount) { // Checks if inventory is empty
+        printf("\nYour inventory is empty.\n"); // Shows empty inventory message
+        return; // Stops inventory display
     }
-    printf("\n========== INVENTORY ==========\n");
-    for (i = 0; i < p->itemCount; i++)
-        printf("%d. %s\n", i + 1, p->inventory[i]);
-    printf("===============================\n");
+    printf("\n========== INVENTORY ==========\n"); // Displays inventory heading
+    for (i = 0; i < p->itemCount; i++) // Repeats through collected items
+        printf("%d. %s\n", i + 1, p->inventory[i]); // Displays each inventory item
+    printf("===============================\n"); // Displays inventory border
 }
 
 /* ==================== 11. MED KIT / HEALING ==================== */
-void useHealingItem(Player *p)
+void useHealingItem(Player *p) // Uses medicine to restore health
 {
-    int i, choice, heal = 0;
+    int i, choice, heal = 0; // Stores healing information
 
-    if (p->health == MAX_HEALTH) {
-        printf("\nYour health is already full.\n");
-        return;
+    if (p->health == MAX_HEALTH) { // Checks if health is full
+        printf("\nYour health is already full.\n"); // Shows full health message
+        return; // Stops healing
     }
 
-    printf("\nHealing Items:\n");
-    for (i = 0; i < p->itemCount; i++)
-        if (!strcmp(p->inventory[i], "Medicine") ||
-            !strcmp(p->inventory[i], "Med Kit"))
-            printf("%d. %s\n", i + 1, p->inventory[i]);
+    printf("\nHealing Items:\n"); // Displays healing item heading
+    for (i = 0; i < p->itemCount; i++) // Searches inventory items
+        if (!strcmp(p->inventory[i], "Medicine") || // Checks for medicine
+            !strcmp(p->inventory[i], "Med Kit")) // Checks for Med Kit
+            printf("%d. %s\n", i + 1, p->inventory[i]); // Displays healing item
 
-    printf("Enter the item number to use: ");
-    if (scanf("%d", &choice) != 1) {
-        while (getchar() != '\n');
-        printf("Invalid choice.\n");
-        return;
+    printf("Enter the item number to use: "); // Asks for item choice
+    if (scanf("%d", &choice) != 1) { // Checks for valid input
+        while (getchar() != '\n'); // Clears invalid input
+        printf("Invalid choice.\n"); // Shows invalid choice
+        return; // Stops healing
     }
-    while (getchar() != '\n');
-    choice--;
+    while (getchar() != '\n'); // Clears remaining input
+    choice--; // Converts choice to index
 
-    if (choice < 0 || choice >= p->itemCount) {
-        printf("Invalid choice.\n");
-        return;
-    }
-
-    if (!strcmp(p->inventory[choice], "Medicine")) heal = 20;
-    else if (!strcmp(p->inventory[choice], "Med Kit")) heal = 35;
-    else {
-        printf("That item cannot be used for healing.\n");
-        return;
+    if (choice < 0 || choice >= p->itemCount) { // Checks valid inventory index
+        printf("Invalid choice.\n"); // Shows invalid choice
+        return; // Stops healing
     }
 
-    p->health += heal;
-    if (p->health > MAX_HEALTH) p->health = MAX_HEALTH;
-    printf("\nYou restored %d health.\n", heal);
-    printf("Current Health: %d/%d\n", p->health, MAX_HEALTH);
+    if (!strcmp(p->inventory[choice], "Medicine")) heal = 20; // Sets medicine healing
+    else if (!strcmp(p->inventory[choice], "Med Kit")) heal = 35; // Sets Med Kit healing
+    else { // Handles non-healing item
+        printf("That item cannot be used for healing.\n"); // Shows healing error
+        return; // Stops healing
+    }
 
-    for (i = choice; i < p->itemCount - 1; i++)
-        strcpy(p->inventory[i], p->inventory[i + 1]);
-    p->itemCount--;
+    p->health += heal; // Adds healing to health
+    if (p->health > MAX_HEALTH) p->health = MAX_HEALTH; // Limits health maximum
+    printf("\nYou restored %d health.\n", heal); // Displays restored health
+    printf("Current Health: %d/%d\n", p->health, MAX_HEALTH); // Displays current health
+
+    for (i = choice; i < p->itemCount - 1; i++) // Shifts remaining items
+        strcpy(p->inventory[i], p->inventory[i + 1]); // Removes used item
+    p->itemCount--; // Decreases inventory count
 }
-
 /* ==================== 12. PUZZLES & KEYS ==================== */
 void solvePuzzle(Room r[], Player *p) // Handles puzzle solving
 {
