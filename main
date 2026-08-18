@@ -275,115 +275,117 @@ void useHealingItem(Player *p)
 }
 
 /* ==================== 12. PUZZLES & KEYS ==================== */
-void solvePuzzle(Room r[], Player *p)
+void solvePuzzle(Room r[], Player *p) // Handles puzzle solving
 {
-    Room *x = &r[p->currentRoom];
-    int answer;
-
-    if (!x->puzzle) {
-        printf("\nThere is no puzzle in this room.\n");
-        return;
+    Room *x = &r[p->currentRoom]; // Gets current room
+    int answer; // Stores puzzle answer
+    if (!x->puzzle) { // Checks for puzzle presence
+        printf("\nThere is no puzzle in this room.\n"); // Shows no-puzzle message
+        return; // Stops puzzle solving
     }
-    if (x->puzzleSolved) {
-        printf("\nYou already solved this puzzle.\n");
-        return;
+    if (x->puzzleSolved) { // Checks if puzzle is solved
+        printf("\nYou already solved this puzzle.\n"); // Shows solved message
+        return; // Stops puzzle solving
     }
 
-    if (p->currentRoom == 3) {
-        printf("\nLIBRARY PUZZLE\nWhich device has keys but no locks?\n");
-        printf("1. Keyboard\n2. Book\n3. Chair\nAnswer: ");
-        scanf("%d", &answer); while (getchar() != '\n');
-        if (answer == 1) {
-            x->puzzleSolved = 1;
-            strcpy(x->item, "Silver Key");
-            p->score += 20;
-            printf("Correct! A Silver Key appeared.\n");
-        } else printf("Wrong answer. Try again later.\n");
-    } else if (p->currentRoom == 5) {
-        printf("\nSECRET CHAMBER PUZZLE\nComplete: 1  3  5  7  ?\n");
-        printf("1. 8\n2. 9\n3. 10\nAnswer: ");
-        scanf("%d", &answer); while (getchar() != '\n');
-        if (answer == 2) {
-            x->puzzleSolved = 1;
-            strcpy(x->item, "Master Key");
-            p->score += 30;
-            printf("Correct! The Master Key appeared.\n");
-        } else printf("Wrong answer. Try again later.\n");
+    if (p->currentRoom == 3) { // Checks for library puzzle
+        printf("\nLIBRARY PUZZLE\nWhich device has keys but no locks?\n"); // Displays library puzzle
+        printf("1. Keyboard\n2. Book\n3. Chair\nAnswer: "); // Displays answer choices
+        scanf("%d", &answer); while (getchar() != '\n'); // Gets puzzle answer
+        if (answer == 1) { // Checks correct library answer
+            x->puzzleSolved = 1; // Marks puzzle as solved
+            strcpy(x->item, "Silver Key"); // Creates silver key
+            p->score += 20; // Adds puzzle score
+            printf("Correct! A Silver Key appeared.\n"); // Announces correct answer
+        } else printf("Wrong answer. Try again later.\n"); // Shows wrong answer
+    } else if (p->currentRoom == 5) { // Checks for chamber puzzle
+        printf("\nSECRET CHAMBER PUZZLE\nComplete: 1  3  5  7  ?\n"); // Displays chamber puzzle
+        printf("1. 8\n2. 9\n3. 10\nAnswer: "); // Displays answer choices
+        scanf("%d", &answer); while (getchar() != '\n'); // Gets puzzle answer
+        if (answer == 2) { // Checks correct chamber answer
+            x->puzzleSolved = 1; // Marks puzzle as solved
+            strcpy(x->item, "Master Key"); // Creates master key
+            p->score += 30; // Adds puzzle score
+            printf("Correct! The Master Key appeared.\n"); // Announces correct answer
+        } else printf("Wrong answer. Try again later.\n"); // Shows wrong answer
     }
 }
 
 /* ==================== 13. INVENTORY HELPER ==================== */
-int hasItem(Player *p, const char item[])
+int hasItem(Player *p, const char item[]) // Checks whether player has item
 {
-    int i;
-    for (i = 0; i < p->itemCount; i++)
-        if (!strcmp(p->inventory[i], item)) return 1;
-    return 0;
+    int i; // Controls inventory search
+    for (i = 0; i < p->itemCount; i++) // Searches all inventory items
+        if (!strcmp(p->inventory[i], item)) return 1; // Returns found result
+    return 0; // Reports item not found
 }
 
 /* ==================== 14. MAIN GAME LOOP & WIN CONDITION ==================== */
-int main(void)
+int main(void) // Starts the game program
 {
-    Room rooms[NUM_ROOMS];
-    Player player;
-    int choice, running = 1;
+    Room rooms[NUM_ROOMS]; // Stores all mansion rooms
+    Player player; // Stores player information
+    int choice, running = 1; // Stores choice and game status
 
-    srand((unsigned int)time(NULL));
-    initializeRooms(rooms);
-    initializePlayer(&player);
+    srand((unsigned int)time(NULL)); // Starts random number generation
+    initializeRooms(rooms); // Initializes mansion rooms
+    initializePlayer(&player); // Initializes player data
 
-    menu();
+    menu(); // Displays the main menu
 
-    printf("\nEnter your name: ");
-    fgets(player.name, sizeof(player.name), stdin);
-    player.name[strcspn(player.name, "\n")] = '\0';
+    printf("\nEnter your name: "); // Asks for player name
+    fgets(player.name, sizeof(player.name), stdin); // Reads player name
+    player.name[strcspn(player.name, "\n")] = '\0'; // Removes newline character
 
-    while (running) {
-        if (player.health <= 0) {
-            printf("\n============================\n");
-            printf("             GAME OVER\n");
-            printf("====================================\n");
-            printf("You were defeated by the ghosts.\n");
-            printf("Final Score: %d\n", player.score);
-            break;
+    while (running) { // Repeats the main game loop
+        if (player.health <= 0) { // Checks if player has no health
+            printf("\n============================\n"); // Displays game-over border
+            printf("             GAME OVER\n"); // Displays game-over message
+            printf("====================================\n"); // Displays game-over border
+            printf("You were defeated by the ghosts.\n"); // Explains game ending
+            printf("Final Score: %d\n", player.score); // Displays final score
+            break; // Ends the game loop
         }
 
-        showRoom(rooms, &player);
-        printf("\n1. Move North\n2. Move South\n3. Move East\n4. Move West\n");
-        printf("5. Take Item\n6. Show Inventory\n7. Use Healing Item\n");
-        printf("8. Solve Puzzle\n9. Exit Game\n");
-        printf("Enter your choice: ");
+        showRoom(rooms, &player); // Displays current room
+        printf("\n1. Move North\n2. Move South\n3. Move East\n4. Move West\n"); // Displays movement options
+        printf("5. Take Item\n6. Show Inventory\n7. Use Healing Item\n"); // Displays item options
+        printf("8. Solve Puzzle\n9. Exit Game\n"); // Displays puzzle and exit options
+        printf("Enter your choice: "); // Asks for game choice
 
-        if (scanf("%d", &choice) != 1) {
-            while (getchar() != '\n');
-            printf("Invalid choice.\n");
-            continue;
+        if (scanf("%d", &choice) != 1) { // Checks for invalid input
+            while (getchar() != '\n'); // Clears invalid input
+            printf("Invalid choice.\n"); // Shows invalid choice
+            continue; // Restarts game loop
         }
-        while (getchar() != '\n');
+        while (getchar() != '\n'); // Clears remaining input
 
-        switch (choice) {
-            case 1: movePlayer(rooms, &player, NORTH); break;
-            case 2: movePlayer(rooms, &player, SOUTH); break;
-            case 3: movePlayer(rooms, &player, EAST); break;
-            case 4: movePlayer(rooms, &player, WEST); break;
-            case 5: takeItem(rooms, &player); break;
-            case 6: showInventory(&player); break;
-            case 7: useHealingItem(&player); break;
-            case 8: solvePuzzle(rooms, &player); break;
-            case 9: printf("\nThank you for playing!\n"); running = 0; break;
-            default: printf("\nInvalid choice. Please try again.\n");
+        switch (choice) { // Selects action from choice
+            case 1: movePlayer(rooms, &player, NORTH); break; // Moves player north
+            case 2: movePlayer(rooms, &player, SOUTH); break; // Moves player south
+            case 3: movePlayer(rooms, &player, EAST); break; // Moves player east
+            case 4: movePlayer(rooms, &player, WEST); break; // Moves player west
+            case 5: takeItem(rooms, &player); break; // Collects room item
+            case 6: showInventory(&player); break; // Shows inventory
+            case 7: useHealingItem(&player); break; // Uses healing item
+            case 8: solvePuzzle(rooms, &player); break; // Solves room puzzle
+            case 9: printf("\nThank you for playing!\n"); running = 0; break; // Exits the game
+            default: printf("\nInvalid choice. Please try again.\n"); // Handles invalid choice
         }
 
-        if (player.currentRoom == 0 && hasItem(&player, "Master Key")) {
-            printf("\n=====================================\n");
-            printf("         CONGRATULATIONS!\n");
-            printf("=====================================\n");
-            printf("%s escaped the Haunted Mansion!\n", player.name);
-            printf("Final Score: %d\n", player.score);
-            printf("Health Left: %d\n", player.health);
-            printf("Thanks for playing!\n");
-            running = 0;
+        if (player.currentRoom == 0 && hasItem(&player, "Master Key")) { // Checks escape condition
+            printf("\n=====================================\n"); // Displays victory border
+            printf("         CONGRATULATIONS!\n"); // Displays victory message
+            printf("=====================================\n"); // Displays victory border
+            printf("%s escaped the Haunted Mansion!\n", player.name); // Announces successful escape
+            printf("Final Score: %d\n", player.score); // Displays final score
+            printf("Health Left: %d\n", player.health); // Displays remaining health
+            printf("Thanks for playing!\n"); // Thanks the player
+            running = 0; // Ends the game
         }
+    }
+    return 0; // Ends program successfully
+}
     }
     return 0;
 
