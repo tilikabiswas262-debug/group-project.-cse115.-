@@ -116,7 +116,7 @@ void initializeRooms(Room r[]) // Sets up mansion rooms
 
 /* ==================== 7. PLAYER
    INITIALIZATION ==================== */
-void initializePlayer(Player *p) // Initializes player data
+void initializePlayer(Player *p) // set's the player's starting state
 {
     p->name[0] = '\0'; // Clears player name
     p->health = MAX_HEALTH; // Sets full starting health
@@ -126,7 +126,7 @@ void initializePlayer(Player *p) // Initializes player data
 }
 
 /* ==================== 8. ROOM DISPLAY ==================== */
-void showRoom(Room r[], Player *p) // Displays current room details
+void showRoom(Room r[], Player *p) // Displays current room and game information
 {
     Room *x = &r[p->currentRoom]; // Gets current room
 
