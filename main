@@ -1,151 +1,153 @@
 /* ==================== 1. HEADER FILES & CONSTANTS ==================== */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <stdio.h> // Provides input and output functions
+#include <stdlib.h> // Provides utility functions
+#include <string.h> // Provides string handling functions
+#include <time.h> // Provides time-based functions
 
-#define NUM_ROOMS 6
-#define MAX_ITEMS 10
-#define MAX_HEALTH 100
-#define NORTH 0
-#define SOUTH 1
-#define EAST 2
-#define WEST 3
+#define NUM_ROOMS 6 // Sets total number of rooms
+#define MAX_ITEMS 10 // Sets maximum inventory items
+#define MAX_HEALTH 100 // Sets maximum player health
+#define NORTH 0 // Represents north direction
+#define SOUTH 1 // Represents south direction
+#define EAST 2 // Represents east direction
+#define WEST 3 // Represents west direction
 
 /* ==================== 2. ROOM STRUCTURE ==================== */
 typedef struct {
-    char name[50], description[300], item[30];
-    int exits[4], itemTaken, puzzle, puzzleSolved;
-    int ghost, ghostDefeated, damage;
+    char name[50], description[300], item[30]; // Stores room information
+    int exits[4], itemTaken, puzzle, puzzleSolved; // Stores room status
+    int ghost, ghostDefeated, damage; // Stores ghost information
 } Room;
 
 /* ==================== 3. PLAYER STRUCTURE ==================== */
 typedef struct {
-    char name[50], inventory[MAX_ITEMS][30];
-    int health, score, currentRoom, itemCount;
+    char name[50], inventory[MAX_ITEMS][30]; // Stores player name and items
+    int health, score, currentRoom, itemCount; // Stores player status
 } Player;
 
 /* ==================== 4. FUNCTION PROTOTYPES ==================== */
-void menu(void);
-void initializeRooms(Room r[]);
-void initializePlayer(Player *p);
-void showRoom(Room r[], Player *p);
-void movePlayer(Room r[], Player *p, int direction);
-void takeItem(Room r[], Player *p);
-void showInventory(Player *p);
-void useHealingItem(Player *p);
-void solvePuzzle(Room r[], Player *p);
-int hasItem(Player *p, const char item[]);
+void menu(void); // Displays the main menu
+void initializeRooms(Room r[]); // Sets up all rooms
+void initializePlayer(Player *p); // Sets initial player values
+void showRoom(Room r[], Player *p); // Displays current room
+void movePlayer(Room r[], Player *p, int direction); // Moves player between rooms
+void takeItem(Room r[], Player *p); // Collects room item
+void showInventory(Player *p); // Displays collected items
+void useHealingItem(Player *p); // Uses a healing item
+void solvePuzzle(Room r[], Player *p); // Handles room puzzles
+int hasItem(Player *p, const char item[]); // Checks for an item
 
 /* ==================== 5. MAIN MENU ==================== */
-void menu(void)
+void menu(void) // Defines the main menu
 {
-    int c;
-    while (1) {
-        printf("\n");
-    printf("  #############################################\n");
-    printf("  #                                           #\n");
-    printf("  #        E S C A P E   T H E                #\n");
-    printf("  #      H A U N T E D   M A N S I O N        #\n");
-    printf("  #                                           #\n");
-    printf("  #############################################\n");
-    printf("\n");
-    printf("           Don't look behind you...\n\n");
-        printf("1. Start Game\n2. Exit\n");
-        printf("Enter your choice: ");
-        if (scanf("%d", &c) != 1) {
-            while (getchar() != '\n');
-            printf("Invalid choice.\n");
-            continue;
+    int c; // Stores menu choice
+    while (1) { // Repeats menu until selected
+       printf("\n"); // Prints a blank line
+printf("  #############################################\n"); // Prints top border
+printf("  #                                           #\n"); // Prints empty title line
+printf("  #        E S C A P E   T H E                #\n"); // Displays main title
+printf("  #      H A U N T E D   M A N S I O N        #\n"); // Displays mansion title
+printf("  #                                           #\n"); // Prints empty title line
+printf("  #############################################\n"); // Prints bottom border
+printf("\n"); // Prints a blank line
+printf("           Don't look behind you...\n\n"); // Displays scary warning
+
+        printf("1. Start Game\n2. Exit\n"); // Displays menu options
+        printf("Enter your choice: "); // Asks for menu choice
+        if (scanf("%d", &c) != 1) { // Checks for invalid input
+            while (getchar() != '\n'); // Clears invalid input
+            printf("Invalid choice.\n"); // Displays error message
+            continue; // Restarts menu loop
         }
-        while (getchar() != '\n');
-        if (c == 1) return;
-        else if (c == 2) exit(0);
-        else printf("Invalid choice. Please try again.\n");
+        while (getchar() != '\n'); // Clears remaining input
+        if (c == 1) return; // Starts the game
+        else if (c == 2) exit(0); // Exits the program
+        else printf("Invalid choice. Please try again.\n"); // Shows invalid choice
     }
 }
 
-void setRoom(Room *r, const char *name, const char *desc)
+void setRoom(Room *r, const char *name, const char *desc) // Initializes one room
 {
-    int i;
-    strcpy(r->name, name);
-    strcpy(r->description, desc);
-    r->item[0] = '\0';
-    r->itemTaken = r->puzzle = r->puzzleSolved = 0;
-    r->ghost = r->ghostDefeated = r->damage = 0;
-    for (i = 0; i < 4; i++) r->exits[i] = -1;
+    int i; // Controls exit initialization
+    strcpy(r->name, name); // Sets room name
+    strcpy(r->description, desc); // Sets room description
+    r->item[0] = '\0'; // Clears room item
+    r->itemTaken = r->puzzle = r->puzzleSolved = 0; // Resets room states
+    r->ghost = r->ghostDefeated = r->damage = 0; // Resets ghost settings
+    for (i = 0; i < 4; i++) r->exits[i] = -1; // Blocks all exits initially
 }
 
-void initializeRooms(Room r[])
+void initializeRooms(Room r[]) // Sets up mansion rooms
 {
-    int i;
-    for (i = 0; i < NUM_ROOMS; i++) setRoom(&r[i], "", "");
+    int i; // Controls room initialization
+    for (i = 0; i < NUM_ROOMS; i++) setRoom(&r[i], "", ""); // Clears all rooms
 
-    setRoom(&r[0], "Entrance Hall",
-        "The entrance of the haunted mansion. Return here with the Master Key to escape.");
-    r[0].exits[EAST] = 1;
+    setRoom(&r[0], "Entrance Hall", // Creates entrance room
+        "The entrance of the haunted mansion. Return here with the Master Key to escape."); // Sets entrance description
+    r[0].exits[EAST] = 1; // Connects entrance to living room
 
-    setRoom(&r[1], "Living Room",
-        "An old living room filled with dusty furniture and broken paintings.");
-    r[1].exits[WEST] = 0; r[1].exits[SOUTH] = 2;
-    strcpy(r[1].item, "Flashlight");
+    setRoom(&r[1], "Living Room", // Creates living room
+        "An old living room filled with dusty furniture and broken paintings."); // Sets living room description
+    r[1].exits[WEST] = 0; r[1].exits[SOUTH] = 2; // Connects living room exits
+    strcpy(r[1].item, "Flashlight"); // Places flashlight in room
 
-    setRoom(&r[2], "Kitchen",
-        "A dark kitchen with rusty utensils scattered everywhere.");
-    r[2].exits[NORTH] = 3;
-    strcpy(r[2].item, "Med Kit");
-    r[2].ghost = 1; r[2].damage = 15;
+    setRoom(&r[2], "Kitchen", // Creates kitchen room
+        "A dark kitchen with rusty utensils scattered everywhere."); // Sets kitchen description
+    r[2].exits[NORTH] = 3; // Connects kitchen to library
+    strcpy(r[2].item, "Med Kit"); // Places Med Kit in room
+    r[2].ghost = 1; r[2].damage = 15; // Adds kitchen ghost
 
-    setRoom(&r[3], "Library",
-        "Ancient books cover every shelf. A mysterious puzzle is hidden here.");
-    r[3].exits[SOUTH] = 2; r[3].exits[WEST] = 4;
-    r[3].puzzle = 1;
+    setRoom(&r[3], "Library", // Creates library room
+        "Ancient books cover every shelf. A mysterious puzzle is hidden here."); // Sets library description
+    r[3].exits[SOUTH] = 2; r[3].exits[WEST] = 4; // Connects library exits
+    r[3].puzzle = 1; // Adds puzzle to library
 
-    setRoom(&r[4], "Basement",
-        "A cold and dark basement. Strange sounds echo from the walls.");
-    r[4].exits[EAST] = 5; r[4].exits[NORTH] = 3;
-    strcpy(r[4].item, "Medicine");
-    r[4].ghost = 1; r[4].damage = 25;
+    setRoom(&r[4], "Basement", // Creates basement room
+        "A cold and dark basement. Strange sounds echo from the walls."); // Sets basement description
+    r[4].exits[EAST] = 5; r[4].exits[NORTH] = 3; // Connects basement exits
+    strcpy(r[4].item, "Medicine"); // Places medicine in room
+    r[4].ghost = 1; r[4].damage = 25; // Adds basement ghost
 
-    setRoom(&r[5], "Secret Chamber",
-        "A hidden chamber containing the final secret of the mansion.");
-    r[5].exits[WEST] = 4; r[5].exits[NORTH] = 0;
-    r[5].puzzle = 1;
+    setRoom(&r[5], "Secret Chamber", // Creates secret chamber
+        "A hidden chamber containing the final secret of the mansion."); // Sets chamber description
+    r[5].exits[WEST] = 4; r[5].exits[NORTH] = 0; // Connects chamber exits
+    r[5].puzzle = 1; // Adds puzzle to chamber
 }
 
-/* ==================== 7. PLAYER INITIALIZATION ==================== */
-void initializePlayer(Player *p)
+/* ==================== 7. PLAYER
+   INITIALIZATION ==================== */
+void initializePlayer(Player *p) // Initializes player data
 {
-    p->name[0] = '\0';
-    p->health = MAX_HEALTH;
-    p->score = 0;
-    p->currentRoom = 0;
-    p->itemCount = 0;
+    p->name[0] = '\0'; // Clears player name
+    p->health = MAX_HEALTH; // Sets full starting health
+    p->score = 0; // Sets starting score
+    p->currentRoom = 0; // Starts player at entrance
+    p->itemCount = 0; // Starts with empty inventory
 }
 
 /* ==================== 8. ROOM DISPLAY ==================== */
-void showRoom(Room r[], Player *p)
+void showRoom(Room r[], Player *p) // Displays current room details
 {
-    Room *x = &r[p->currentRoom];
+    Room *x = &r[p->currentRoom]; // Gets current room
 
-    printf("\n===============================\n");
-    printf("Player: %s | Health: %d/%d | Score: %d\n",
-           p->name, p->health, MAX_HEALTH, p->score);
-    printf("Room: %s\n%s\n", x->name, x->description);
+    printf("\n===============================\n"); // Displays room border
+    printf("Player: %s | Health: %d/%d | Score: %d\n", // Displays player status
+           p->name, p->health, MAX_HEALTH, p->score); // Supplies status values
+    printf("Room: %s\n%s\n", x->name, x->description); // Displays room information
 
-    if (strlen(x->item) && !x->itemTaken)
-        printf("Item Available: %s\n", x->item);
-    if (x->puzzle && !x->puzzleSolved)
-        printf("A puzzle is waiting to be solved.\n");
-    if (x->ghost && !x->ghostDefeated)
-        printf("WARNING: A ghost is present!\n");
+    if (strlen(x->item) && !x->itemTaken) // Checks for available item
+        printf("Item Available: %s\n", x->item); // Displays available item
+    if (x->puzzle && !x->puzzleSolved) // Checks for unsolved puzzle
+        printf("A puzzle is waiting to be solved.\n"); // Announces puzzle
+    if (x->ghost && !x->ghostDefeated) // Checks for active ghost
+        printf("WARNING: A ghost is present!\n"); // Warns about ghost
 
-    printf("Exits:");
-    if (x->exits[NORTH] != -1) printf(" North");
-    if (x->exits[SOUTH] != -1) printf(" South");
-    if (x->exits[EAST] != -1) printf(" East");
-    if (x->exits[WEST] != -1) printf(" West");
-    printf("\n===============================\n");
+    printf("Exits:"); // Displays exit heading
+    if (x->exits[NORTH] != -1) printf(" North"); // Shows north exit
+    if (x->exits[SOUTH] != -1) printf(" South"); // Shows south exit
+    if (x->exits[EAST] != -1) printf(" East"); // Shows east exit
+    if (x->exits[WEST] != -1) printf(" West"); // Shows west exit
+    printf("\n===============================\n"); // Displays room border
 }
 /* ==================== 9. MOVEMENT & GHOST ATTACKS ==================== */
 void movePlayer(Room r[], Player *p, int direction) // Moves player and handles ghosts
